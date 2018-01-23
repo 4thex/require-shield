@@ -1,0 +1,11 @@
+{
+  "name": "require-shield",
+  "version": "1.0.0",
+  "description": "Control which other modules can be required by modules",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "4thex",
+  "license": "MIT"
+}
