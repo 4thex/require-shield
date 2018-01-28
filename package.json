@@ -4,7 +4,7 @@
   "description": "Control which other modules can be required by modules",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha test/whitelist.js; mocha test/blacklist.js"
   },
   "author": "4thex",
   "license": "MIT",
