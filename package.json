@@ -1,6 +1,6 @@
 {
   "name": "require-shield",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Control which other modules can be required by modules",
   "main": "index.js",
   "scripts": {

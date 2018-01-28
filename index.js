@@ -5,6 +5,7 @@ var Shield = function(spec) {
     var originals = {};
     originals.require = CoreModule.prototype.require;
     var localRequire = function(path) {
+        var module = this;
         var caught = exceptions.some(function(x) {
            var toRequirePattern = new RegExp(x.toRequire);
            var caughtToRequire = toRequirePattern.test(path);
@@ -12,14 +13,14 @@ var Shield = function(spec) {
                return caughtToRequire;
            }
            var fromModulesPattern = new RegExp(x.fromModules);
-           var caughtFromModules = fromModulesPattern.test(this.filename);
+           var caughtFromModules = fromModulesPattern.test(module.filename);
            return caughtFromModules;
         });
         if(caught?whitelist:!whitelist) {
             var required = originals.require(path);
             return required;
         } else {
-            throw new Error(`Mode: ${spec.mode}. '${this.filename}' attempted to require('${path}')`);
+            throw new Error(`Mode: ${spec.mode}. '${module.filename}' attempted to require('${path}')`);
         }
     };
     CoreModule.prototype.require = localRequire;

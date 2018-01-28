@@ -2,40 +2,44 @@ var assert = require('assert');
 
 describe('require-shield({mode: \'black-list\'})', function() {
   var shield = require('../index.js')({mode: 'black-list'});
-  describe('#except(\'^stream|string_decoder$\')', function() {
-    shield.except('^stream|string_decoder$');
-    it('should prevent loading the \'stream\' module', function() {
-      assert.throws(() => {
-          require('stream');
-      });
+  describe('#except(\'^glob|diff$\', \'blacklist.js$\')', function() {
+    shield.except('^glob|diff$', 'blacklist.js$');
+    it('should prevent loading the \'glob\' module from the \'blacklist.js\' module', function() {
+      try {
+        assert.throws(() => {
+            require('glob');
+        }, /Mode: black-list/);
+      } catch (error) {
+        // Only throw on assertion error
+        if(error.name === 'AssertionError') {
+          throw(error);
+        }
+      }
     });
-    it('should prevent loading the \'string_decoder\' module', function() {
-      assert.throws(() => {
-          require('string_decoder');
-      });
+    it('should prevent loading the \'diff\' module from the \'blacklist.js\' module', function() {
+      try {
+        assert.throws(() => {
+            require('diff');
+        }, /Mode: black-list/);
+      } catch (error) {
+        // Only throw on assertion error
+        if(error.name === 'AssertionError') {
+          throw(error);
+        }
+      }
     });
-    it('should allow loading the \'fs\' module', function() {
-      assert.doesNotThrow(() => {
-          require('fs');
-      });
+    it('should allow loading the \'fs\' module from the \'blacklist.js\' module', function() {
+      try {
+        assert.doesNotThrow(() => {
+            require('fs');
+        }, /Mode: black-list/);
+      } catch (error) {
+        // Only throw on assertion error
+        if(error.name === 'AssertionError') {
+          throw(error);
+        }
+      }
     });
-    
   });
-  describe('#except(\'^chalk|async$\', \'^sax$\')', function() {
-    shield.except('^chalk|async$', '^sax$');
-    it('should prevent loading the \'chalk\' module from the \'sax\' module', function() {
-      assert.throws(() => {
-          require.apply({
-            filename: 'sax'
-          }, 'chalk');
-      });
-    });
-    it('should prevent loading the \'async\' module from the \'sax\' module', function() {
-      assert.throws(() => {
-          require.apply({
-            filename: 'sax'
-          }, 'async');
-      });
-    });
-  });
+  
 });
