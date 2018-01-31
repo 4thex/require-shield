@@ -1,10 +1,14 @@
 var CoreModule = require('module');
 var Shield = function(spec) {
     var exceptions = [];
+    var cache = new Map();
     var whitelist = spec.mode === 'white-list';
     var originals = {};
     originals.require = CoreModule.prototype.require;
-    var localRequire = function(path) {
+    originals.load = CoreModule.prototype.constructor._load;
+    var isAllowed = function(path) {
+        var cached = cache.has(path);
+        if(cached) return cache.get(path);
         var module = this;
         var caught = exceptions.some(function(x) {
            var toRequirePattern = new RegExp(x.toRequire);
@@ -16,7 +20,22 @@ var Shield = function(spec) {
            var caughtFromModules = fromModulesPattern.test(module.filename);
            return caughtFromModules;
         });
-        if(caught?whitelist:!whitelist) {
+        var allowed = caught?whitelist:!whitelist;
+        cache.set(path, allowed);
+        return allowed;
+    };
+    var localLoad = function(path, parent, isMain) {
+        var allowed = isAllowed(path);
+        if(allowed) {
+            return originals.load(path, parent, isMain);
+        } else {
+            // TODO: The module object is wrong here 
+            throw new Error(`Mode: ${spec.mode}. '${module.filename}' attempted to load('${path}')`);
+        }
+    };
+    var localRequire = function(path) {
+        var allowed = isAllowed(path);
+        if(allowed) {
             var required = originals.require(path);
             return required;
         } else {
@@ -24,6 +43,7 @@ var Shield = function(spec) {
         }
     };
     CoreModule.prototype.require = localRequire;
+    CoreModule.prototype.constructor._load = localLoad;
     var except = function(toRequire, fromModules) {
         exceptions.push({
             toRequire: toRequire,
