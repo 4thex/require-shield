@@ -6,10 +6,9 @@ var Shield = function(spec) {
     var originals = {};
     originals.require = CoreModule.prototype.require;
     originals.load = CoreModule.prototype.constructor._load;
-    var isAllowed = function(path) {
+    var isAllowed = function(path, module) {
         var cached = cache.has(path);
         if(cached) return cache.get(path);
-        var module = this;
         var caught = exceptions.some(function(x) {
            var toRequirePattern = new RegExp(x.toRequire);
            var caughtToRequire = toRequirePattern.test(path);
@@ -34,7 +33,8 @@ var Shield = function(spec) {
         }
     };
     var localRequire = function(path) {
-        var allowed = isAllowed(path);
+        var module = this;
+        var allowed = isAllowed(path, module);
         if(allowed) {
             var required = originals.require(path);
             return required;
